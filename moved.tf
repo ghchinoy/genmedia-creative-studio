@@ -150,3 +150,19 @@ moved {
   from = google_project_iam_member.creative_studio_vertex_access
   to   = module.iam.google_project_iam_member.creative_studio_vertex_access
 }
+
+# --- networking-lb module (root count-gated by var.use_lb) ---
+moved {
+  from = google_compute_global_address.lb_ipv4[0]
+  to   = module.networking-lb[0].google_compute_global_address.lb_ipv4[0]
+}
+
+moved {
+  from = module.lb-http[0]
+  to   = module.networking-lb[0].module.lb-http
+}
+
+moved {
+  from = google_compute_region_network_endpoint_group.cloudrun_neg[0]
+  to   = module.networking-lb[0].google_compute_region_network_endpoint_group.cloudrun_neg
+}

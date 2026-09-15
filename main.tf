@@ -83,57 +83,16 @@ resource "google_cloud_run_service_iam_member" "iap_cloudrun_access" {
   member   = google_project_service_identity.iap_sa.member
 }
 
-# Reserved (static) global IP for the external load balancer. Managed by
-# Terraform so the address is stable across load balancer recreation. When
-# var.reserved_ip_address is set, that pre-existing address is used instead.
-resource "google_compute_global_address" "lb_ipv4" {
-  count      = var.use_lb && var.reserved_ip_address == null ? 1 : 0
-  name       = "creativestudio-lb-ip"
-  ip_version = "IPV4"
-  depends_on = [module.apis]
-}
+module "networking-lb" {
+  count               = var.use_lb ? 1 : 0
+  source              = "./modules/networking-lb"
+  project_id          = var.project_id
+  region              = var.region
+  domain              = var.domain
+  reserved_ip_address = var.reserved_ip_address
+  service_name        = google_cloud_run_v2_service.creative_studio.name
+  enable_iap          = true
 
-module "lb-http" {
-  count                           = var.use_lb ? 1 : 0
-  source                          = "terraform-google-modules/lb-http/google//modules/serverless_negs"
-  version                         = "~> 14.0"
-  name                            = "creativestudio"
-  project                         = var.project_id
-  load_balancing_scheme           = "EXTERNAL_MANAGED"
-  ssl                             = var.use_lb
-  managed_ssl_certificate_domains = [var.domain]
-  https_redirect                  = var.use_lb
-  address                         = coalesce(var.reserved_ip_address, one(google_compute_global_address.lb_ipv4[*].address))
-  create_address                  = false
-  backends = {
-    default = {
-      description = "Creative Studio backend"
-      protocol    = "HTTPS"
-      enable_cdn  = false
-      groups = [
-        {
-          group = google_compute_region_network_endpoint_group.cloudrun_neg[0].id
-        }
-      ]
-      iap_config = {
-        enable = true
-      }
-      log_config = {
-        enable = true
-      }
-    }
-  }
-  depends_on = [module.apis]
-}
-
-resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
-  count                 = var.use_lb ? 1 : 0
-  name                  = "cloudrun-neg"
-  network_endpoint_type = "SERVERLESS"
-  region                = var.region
-  cloud_run {
-    service = google_cloud_run_v2_service.creative_studio.name
-  }
   depends_on = [module.apis]
 }
 

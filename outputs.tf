@@ -15,7 +15,7 @@
 */
 
 output "load-balancer-ip" {
-  value       = var.use_lb ? module.lb-http[0].external_ip : ""
+  value       = var.use_lb ? module.networking-lb[0].load_balancer_ip : ""
   description = "IP Address that should be used for DNS A record for the domain provided."
 }
 
