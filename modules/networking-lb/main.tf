@@ -78,3 +78,12 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
     service = var.service_name
   }
 }
+
+# IAP HTTPS access for the initial user. This whole module is count-gated by
+# var.use_lb in the root, so the root's `use_lb && initial_user != null` gate
+# collapses here to just the initial_user check. Behaviour preserved exactly.
+resource "google_iap_web_iam_member" "initial_user_iap_access" {
+  count  = var.initial_user != null ? 1 : 0
+  role   = "roles/iap.httpsResourceAccessor"
+  member = "user:${var.initial_user}"
+}

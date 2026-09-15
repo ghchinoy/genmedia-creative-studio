@@ -46,3 +46,10 @@ variable "enable_iap" {
   type        = bool
   default     = true
 }
+
+variable "initial_user" {
+  description = "Email address of the initial user granted IAP HTTPS access. When null, no grant is created."
+  type        = string
+  nullable    = true
+  default     = null
+}
