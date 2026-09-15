@@ -329,48 +329,15 @@ resource "google_project_iam_member" "build_logs_writer" {
   member  = google_service_account.cloudbuild.member
 }
 
-module "source_bucket" {
-  source     = "terraform-google-modules/cloud-storage/google"
-  version    = "~> 12.0"
-  project_id = var.project_id
-  names      = ["run-resources-${var.project_id}-${var.region}"]
-  location   = var.region
-  force_destroy = {
-    "run-resources-${var.project_id}-${var.region}" = var.enable_data_deletion
-  }
-  set_admin_roles          = true
-  bucket_admins            = {}
-  admins                   = ["user:${var.initial_user}"]
-  set_creator_roles        = true
-  bucket_creators          = {}
-  creators                 = [google_service_account.cloudbuild.member]
-  set_viewer_roles         = true
-  bucket_viewers           = {}
-  viewers                  = [google_service_account.cloudbuild.member]
-  public_access_prevention = "enforced"
-  depends_on               = [module.apis]
-}
+module "registry" {
+  source               = "./modules/artifact-registry"
+  project_id           = var.project_id
+  region               = var.region
+  initial_user         = var.initial_user
+  enable_data_deletion = var.enable_data_deletion
+  build_sa_member      = google_service_account.cloudbuild.member
 
-resource "google_artifact_registry_repository" "creative_studio" {
-  repository_id = "creative-studio"
-  description   = "Docker repository for GenMedia Creative Studio related images"
-  format        = "DOCKER"
-  vulnerability_scanning_config {
-    enablement_config = "INHERITED"
-  }
   depends_on = [module.apis]
-}
-
-resource "google_artifact_registry_repository_iam_member" "readers" {
-  repository = google_artifact_registry_repository.creative_studio.name
-  role       = "roles/artifactregistry.reader"
-  member     = google_service_account.cloudbuild.member
-}
-
-resource "google_artifact_registry_repository_iam_member" "writers" {
-  repository = google_artifact_registry_repository.creative_studio.name
-  role       = "roles/artifactregistry.writer"
-  member     = google_service_account.cloudbuild.member
 }
 
 resource "google_cloud_run_service_iam_member" "build_service" {

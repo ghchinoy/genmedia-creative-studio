@@ -63,3 +63,24 @@ moved {
   from = google_firestore_index.genmedia_user_email_mime_type_timestamp
   to   = module.data.google_firestore_index.genmedia_user_email_mime_type_timestamp
 }
+
+# --- artifact-registry module ---
+moved {
+  from = module.source_bucket
+  to   = module.registry.module.source_bucket
+}
+
+moved {
+  from = google_artifact_registry_repository.creative_studio
+  to   = module.registry.google_artifact_registry_repository.creative_studio
+}
+
+moved {
+  from = google_artifact_registry_repository_iam_member.readers
+  to   = module.registry.google_artifact_registry_repository_iam_member.readers
+}
+
+moved {
+  from = google_artifact_registry_repository_iam_member.writers
+  to   = module.registry.google_artifact_registry_repository_iam_member.writers
+}
