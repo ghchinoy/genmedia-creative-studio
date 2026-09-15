@@ -25,7 +25,7 @@ output "assets-bucket" {
 }
 
 output "cloud-run-app-url" {
-  value       = !var.use_lb ? "https://${google_cloud_run_v2_service.creative_studio.name}-${data.google_project.project.number}.${google_cloud_run_v2_service.creative_studio.location}.run.app" : ""
+  value       = !var.use_lb ? "https://${module.cloud-run-service.service_name}-${data.google_project.project.number}.${module.cloud-run-service.service_location}.run.app" : ""
   description = "The Cloud Run URL where the website can be reached."
 }
 

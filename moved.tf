@@ -166,3 +166,42 @@ moved {
   from = google_compute_region_network_endpoint_group.cloudrun_neg[0]
   to   = module.networking-lb[0].google_compute_region_network_endpoint_group.cloudrun_neg
 }
+
+# initial_user_iap_access relocated from root into networking-lb (Group C). The
+# root gate was `use_lb && initial_user != null`; the module is itself count-gated
+# by use_lb, so the surviving instance address only exists when use_lb is true.
+moved {
+  from = google_iap_web_iam_member.initial_user_iap_access[0]
+  to   = module.networking-lb[0].google_iap_web_iam_member.initial_user_iap_access[0]
+}
+
+# --- cloud-run-service module (Group C) ---
+moved {
+  from = google_cloud_run_v2_service.creative_studio
+  to   = module.cloud-run-service.google_cloud_run_v2_service.creative_studio
+}
+
+moved {
+  from = google_project_service_identity.iap_sa
+  to   = module.cloud-run-service.google_project_service_identity.iap_sa
+}
+
+moved {
+  from = google_cloud_run_service_iam_member.iap_cloudrun_access
+  to   = module.cloud-run-service.google_cloud_run_service_iam_member.iap_cloudrun_access
+}
+
+moved {
+  from = google_service_account_iam_member.build_act_as_creative_studio
+  to   = module.cloud-run-service.google_service_account_iam_member.build_act_as_creative_studio
+}
+
+moved {
+  from = google_project_iam_member.build_logs_writer
+  to   = module.cloud-run-service.google_project_iam_member.build_logs_writer
+}
+
+moved {
+  from = google_cloud_run_service_iam_member.build_service
+  to   = module.cloud-run-service.google_cloud_run_service_iam_member.build_service
+}
