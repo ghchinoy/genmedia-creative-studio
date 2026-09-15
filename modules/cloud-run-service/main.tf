@@ -96,7 +96,7 @@ resource "google_cloud_run_service_iam_member" "iap_cloudrun_access" {
   location = google_cloud_run_v2_service.creative_studio.location
   service  = google_cloud_run_v2_service.creative_studio.name
   role     = "roles/run.invoker"
-  member   = var.iap_member
+  member   = google_project_service_identity.iap_sa.member
 }
 
 /********************************************

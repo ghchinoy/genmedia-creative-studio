@@ -104,11 +104,6 @@ variable "launch_stage" {
   type        = string
 }
 
-variable "iap_member" {
-  description = "IAM member string for the IAP service identity granted run.invoker on this service."
-  type        = string
-}
-
 # --- Phase 1 no-op inputs (present but null; wired in a later phase) ---
 # Kept in the interface so the compute contract is stable across the Cloud Run
 # and future GKE paths. Not referenced yet: declaring them is behaviour-neutral.
