@@ -52,33 +52,10 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-module "project-services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "~>18.0"
-  project_id                  = var.project_id
-  disable_services_on_destroy = false
-  activate_apis = [
-    "iap.googleapis.com",
-    "compute.googleapis.com",
-    "certificatemanager.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "run.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "containerscanning.googleapis.com",
-    "storage.googleapis.com",
-    "aiplatform.googleapis.com",
-    "firestore.googleapis.com",
-    "cloudtasks.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-  ]
-}
-
-resource "null_resource" "sleep" {
-  depends_on = [module.project-services.project_id]
-  provisioner "local-exec" {
-    command = "sleep ${var.sleep_time}"
-  }
+module "apis" {
+  source     = "./modules/project-services"
+  project_id = var.project_id
+  sleep_time = var.sleep_time
 }
 
 /********************************************
@@ -96,7 +73,7 @@ resource "google_iap_web_iam_member" "initial_user_iap_access" {
   count      = var.use_lb && var.initial_user != null ? 1 : 0
   role       = "roles/iap.httpsResourceAccessor"
   member     = "user:${var.initial_user}"
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 resource "google_cloud_run_service_iam_member" "iap_cloudrun_access" {
@@ -113,7 +90,7 @@ resource "google_compute_global_address" "lb_ipv4" {
   count      = var.use_lb && var.reserved_ip_address == null ? 1 : 0
   name       = "creativestudio-lb-ip"
   ip_version = "IPV4"
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 module "lb-http" {
@@ -146,7 +123,7 @@ module "lb-http" {
       }
     }
   }
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
@@ -157,7 +134,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
   cloud_run {
     service = google_cloud_run_v2_service.creative_studio.name
   }
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 /********************************************
@@ -172,7 +149,7 @@ resource "google_cloud_tasks_queue" "thumbnail_queue" {
   name       = "thumbnail-extraction"
   location   = var.region
   project    = var.project_id
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 resource "google_project_iam_member" "creative_studio_tasks_enqueuer" {
@@ -185,30 +162,30 @@ resource "google_project_iam_member" "creative_studio_tasks_enqueuer" {
 locals {
   asset_bucket_name = "creative-studio-${var.project_id}-assets"
   creative_studio_env_vars = {
-    PROJECT_ID            = var.project_id
-    LOCATION              = var.region
-    GEMINI_LOCATION       = var.gemini_location
-    GEMINI_TTS_LOCATION   = var.gemini_tts_location
-    MODEL_ID              = var.model_id
-    GEMINI_AUDIO_ANALYSIS_MODEL_ID = var.gemini_audio_analysis_model_id
-    GEMINI_CRITIQUE_MODEL_ID = var.gemini_critique_model_id
-    GEMINI_CRITIQUE_LOCATION = var.gemini_critique_location
+    PROJECT_ID                            = var.project_id
+    LOCATION                              = var.region
+    GEMINI_LOCATION                       = var.gemini_location
+    GEMINI_TTS_LOCATION                   = var.gemini_tts_location
+    MODEL_ID                              = var.model_id
+    GEMINI_AUDIO_ANALYSIS_MODEL_ID        = var.gemini_audio_analysis_model_id
+    GEMINI_CRITIQUE_MODEL_ID              = var.gemini_critique_model_id
+    GEMINI_CRITIQUE_LOCATION              = var.gemini_critique_location
     CHARACTER_CONSISTENCY_GEMINI_LOCATION = var.character_consistency_gemini_location
-    VEO_MODEL_ID          = var.veo_model_id
-    VEO_LOCATION          = coalesce(var.veo_location, var.region)
-    VEO_EXP_MODEL_ID      = var.veo_exp_model_id
-    LYRIA_MODEL_VERSION   = var.lyria_model_id
-    LYRIA_PROJECT_ID      = var.project_id
-    GENMEDIA_BUCKET       = local.asset_bucket_name
-    VIDEO_BUCKET          = local.asset_bucket_name
-    MEDIA_BUCKET          = local.asset_bucket_name
-    IMAGE_BUCKET          = local.asset_bucket_name
-    GCS_ASSETS_BUCKET     = local.asset_bucket_name
-    GENMEDIA_FIREBASE_DB  = google_firestore_database.create_studio_asset_metadata.name
-    SERVICE_ACCOUNT_EMAIL = google_service_account.creative_studio.email
-    EDIT_IMAGES_ENABLED   = var.edit_images_enabled
-    THUMBNAIL_QUEUE_ID    = google_cloud_tasks_queue.thumbnail_queue.name
-    API_BASE_URL          = var.api_base_url != "" ? var.api_base_url : (var.use_lb ? "https://${var.domain}" : "")
+    VEO_MODEL_ID                          = var.veo_model_id
+    VEO_LOCATION                          = coalesce(var.veo_location, var.region)
+    VEO_EXP_MODEL_ID                      = var.veo_exp_model_id
+    LYRIA_MODEL_VERSION                   = var.lyria_model_id
+    LYRIA_PROJECT_ID                      = var.project_id
+    GENMEDIA_BUCKET                       = local.asset_bucket_name
+    VIDEO_BUCKET                          = local.asset_bucket_name
+    MEDIA_BUCKET                          = local.asset_bucket_name
+    IMAGE_BUCKET                          = local.asset_bucket_name
+    GCS_ASSETS_BUCKET                     = local.asset_bucket_name
+    GENMEDIA_FIREBASE_DB                  = google_firestore_database.create_studio_asset_metadata.name
+    SERVICE_ACCOUNT_EMAIL                 = google_service_account.creative_studio.email
+    EDIT_IMAGES_ENABLED                   = var.edit_images_enabled
+    THUMBNAIL_QUEUE_ID                    = google_cloud_tasks_queue.thumbnail_queue.name
+    API_BASE_URL                          = var.api_base_url != "" ? var.api_base_url : (var.use_lb ? "https://${var.domain}" : "")
   }
 
   deployed_domain = var.use_lb ? ["https://${var.domain}"] : google_cloud_run_v2_service.creative_studio.urls
@@ -258,7 +235,7 @@ resource "google_cloud_run_v2_service" "creative_studio" {
   depends_on = [
     google_service_account_iam_member.build_act_as_creative_studio,
     google_project_iam_member.build_logs_writer,
-    null_resource.sleep
+    module.apis
   ]
 }
 
@@ -352,7 +329,7 @@ resource "google_firestore_database" "create_studio_asset_metadata" {
   # Terraform docs / testing showed that deletion_policy is needed for db to be delete when using terraform destroy
   # See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/firestore_database#delete_protection_state-1
   deletion_policy = var.enable_data_deletion ? "DELETE" : "ABANDON"
-  depends_on      = [null_resource.sleep]
+  depends_on      = [module.apis]
 }
 
 resource "google_firestore_index" "genmedia_library_mime_type_timestamp" {
@@ -479,7 +456,7 @@ module "source_bucket" {
   bucket_viewers           = {}
   viewers                  = [google_service_account.cloudbuild.member]
   public_access_prevention = "enforced"
-  depends_on               = [null_resource.sleep]
+  depends_on               = [module.apis]
 }
 
 resource "google_artifact_registry_repository" "creative_studio" {
@@ -489,7 +466,7 @@ resource "google_artifact_registry_repository" "creative_studio" {
   vulnerability_scanning_config {
     enablement_config = "INHERITED"
   }
-  depends_on = [null_resource.sleep]
+  depends_on = [module.apis]
 }
 
 resource "google_artifact_registry_repository_iam_member" "readers" {
