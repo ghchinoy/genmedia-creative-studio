@@ -114,21 +114,16 @@ resource "google_project_iam_member" "creative_studio_vertex_access" {
 }
 
 /********************************************
-*  Build service account + bindings
+*  Build service account
 *********************************************/
+
+# NOTE: the build-SA IAM bindings that reference the Cloud Run service or that
+# the Cloud Run resource must be ordered after (build_act_as_creative_studio,
+# build_logs_writer, build_service) remain in the root. Encapsulating them here
+# would force the root Cloud Run resource to depend on the whole iam module,
+# creating a module-level dependency cycle with the data-stores/CORS coupler.
+# Group C dissolves that coupler and can relocate these alongside cloud-run.
 
 resource "google_service_account" "cloudbuild" {
   account_id = "builds-creative-studio"
-}
-
-resource "google_service_account_iam_member" "build_act_as_creative_studio" {
-  service_account_id = google_service_account.creative_studio.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = google_service_account.cloudbuild.member
-}
-
-resource "google_project_iam_member" "build_logs_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = google_service_account.cloudbuild.member
 }

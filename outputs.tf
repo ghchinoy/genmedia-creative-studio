@@ -30,11 +30,11 @@ output "cloud-run-app-url" {
 }
 
 output "builds-service-account" {
-  value       = google_service_account.cloudbuild.email
+  value       = module.iam.build_sa_email
   description = "Service Account used for Cloud Build"
 }
 
 output "application-service-account" {
-  value       = google_service_account.creative_studio.email
+  value       = module.iam.runtime_sa_email
   description = "Service Account used by the Creative Studio web application"
 }

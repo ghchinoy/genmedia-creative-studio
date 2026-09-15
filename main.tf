@@ -141,10 +141,6 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
 *  Runtime Resources Section
 *********************************************/
 
-resource "google_service_account" "creative_studio" {
-  account_id = "service-creative-studio"
-}
-
 module "data" {
   source                   = "./modules/data-stores"
   project_id               = var.project_id
@@ -157,10 +153,12 @@ module "data" {
   depends_on = [module.apis]
 }
 
-resource "google_project_iam_member" "creative_studio_tasks_enqueuer" {
-  project = var.project_id
-  role    = "roles/cloudtasks.enqueuer"
-  member  = google_service_account.creative_studio.member
+module "iam" {
+  source             = "./modules/iam"
+  project_id         = var.project_id
+  firestore_db_id    = module.data.firestore_db_id
+  assets_bucket_name = module.data.assets_bucket_name
+  initial_user       = var.initial_user
 }
 
 # Centralizing environment variables here and using for each in service declaration for simplicity
@@ -187,7 +185,7 @@ locals {
     IMAGE_BUCKET                          = local.asset_bucket_name
     GCS_ASSETS_BUCKET                     = local.asset_bucket_name
     GENMEDIA_FIREBASE_DB                  = module.data.firestore_db_name
-    SERVICE_ACCOUNT_EMAIL                 = google_service_account.creative_studio.email
+    SERVICE_ACCOUNT_EMAIL                 = module.iam.runtime_sa_email
     EDIT_IMAGES_ENABLED                   = var.edit_images_enabled
     THUMBNAIL_QUEUE_ID                    = module.data.tasks_queue_name
     API_BASE_URL                          = var.api_base_url != "" ? var.api_base_url : (var.use_lb ? "https://${var.domain}" : "")
@@ -229,7 +227,7 @@ resource "google_cloud_run_v2_service" "creative_studio" {
         }
       }
     }
-    service_account = google_service_account.creative_studio.email
+    service_account = module.iam.runtime_sa_email
     scaling {
       max_instance_count = 1
     }
@@ -244,89 +242,24 @@ resource "google_cloud_run_v2_service" "creative_studio" {
   ]
 }
 
-/* There are times when Vertex service account is not automatically provisioned, creating explicitly to be sure */
-resource "google_project_service_identity" "vertex_sa" {
-  provider = google-beta
-  project  = var.project_id
-  service  = "aiplatform.googleapis.com"
-}
-
-resource "google_project_iam_member" "vertex_sa_access" {
-  project = var.project_id
-  role    = "roles/aiplatform.serviceAgent"
-  member  = google_project_service_identity.vertex_sa.member
-}
-
-resource "google_storage_bucket_iam_member" "admins" {
-  bucket = module.data.assets_bucket_name
-  role   = "roles/storage.objectAdmin"
-  member = "user:${var.initial_user}"
-}
-
-resource "google_storage_bucket_iam_member" "creators" {
-  bucket = module.data.assets_bucket_name
-  role   = "roles/storage.objectCreator"
-  member = google_service_account.creative_studio.member
-}
-
-resource "google_storage_bucket_iam_member" "viewers" {
-  bucket = module.data.assets_bucket_name
-  role   = "roles/storage.objectViewer"
-  member = google_service_account.creative_studio.member
-}
-
-resource "google_storage_bucket_iam_member" "sa_bucket_viewer" {
-  bucket = module.data.assets_bucket_name
-  role   = "roles/storage.bucketViewer"
-  member = google_service_account.creative_studio.member
-}
-
-resource "google_storage_bucket_iam_member" "sa_object_user" {
-  bucket = module.data.assets_bucket_name
-  role   = "roles/storage.objectUser"
-  member = google_service_account.creative_studio.member
-}
-
-resource "google_project_iam_member" "creative_studio_sa_token_creator" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = google_service_account.creative_studio.member
-}
-
-resource "google_project_iam_member" "creative_studio_db_access" {
-  project = var.project_id
-  role    = "roles/datastore.user"
-  member  = google_service_account.creative_studio.member
-  condition {
-    title      = "Access to Create Studio Asset Metadata DB"
-    expression = "resource.name==\"${module.data.firestore_db_id}\""
-  }
-}
-
-resource "google_project_iam_member" "creative_studio_vertex_access" {
-  project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = google_service_account.creative_studio.member
-}
-
 /********************************************
 *  Build time Resources Section
 *********************************************/
 
-resource "google_service_account" "cloudbuild" {
-  account_id = "builds-creative-studio"
-}
-
+# These build-SA bindings stay in the root (not the iam module): the Cloud Run
+# resource depends_on them directly, and build_service references the Cloud Run
+# service. Keeping them at root preserves those as granular dependencies and
+# avoids a module-level cycle. They consume the SA identities from module.iam.
 resource "google_service_account_iam_member" "build_act_as_creative_studio" {
-  service_account_id = google_service_account.creative_studio.name
+  service_account_id = module.iam.runtime_sa_name
   role               = "roles/iam.serviceAccountUser"
-  member             = google_service_account.cloudbuild.member
+  member             = module.iam.build_sa_member
 }
 
 resource "google_project_iam_member" "build_logs_writer" {
   project = var.project_id
   role    = "roles/logging.logWriter"
-  member  = google_service_account.cloudbuild.member
+  member  = module.iam.build_sa_member
 }
 
 module "registry" {
@@ -335,7 +268,7 @@ module "registry" {
   region               = var.region
   initial_user         = var.initial_user
   enable_data_deletion = var.enable_data_deletion
-  build_sa_member      = google_service_account.cloudbuild.member
+  build_sa_member      = module.iam.build_sa_member
 
   depends_on = [module.apis]
 }
@@ -344,5 +277,5 @@ resource "google_cloud_run_service_iam_member" "build_service" {
   location = google_cloud_run_v2_service.creative_studio.location
   service  = google_cloud_run_v2_service.creative_studio.name
   role     = "roles/run.developer"
-  member   = google_service_account.cloudbuild.member
+  member   = module.iam.build_sa_member
 }

@@ -24,6 +24,11 @@ output "runtime_sa_member" {
   value       = google_service_account.creative_studio.member
 }
 
+output "runtime_sa_name" {
+  description = "Fully-qualified resource name of the runtime service account (projects/.../serviceAccounts/...)."
+  value       = google_service_account.creative_studio.name
+}
+
 output "build_sa_email" {
   description = "Email of the Cloud Build service account."
   value       = google_service_account.cloudbuild.email

@@ -84,3 +84,69 @@ moved {
   from = google_artifact_registry_repository_iam_member.writers
   to   = module.registry.google_artifact_registry_repository_iam_member.writers
 }
+
+# --- iam module ---
+moved {
+  from = google_service_account.creative_studio
+  to   = module.iam.google_service_account.creative_studio
+}
+
+moved {
+  from = google_service_account.cloudbuild
+  to   = module.iam.google_service_account.cloudbuild
+}
+
+moved {
+  from = google_project_iam_member.creative_studio_tasks_enqueuer
+  to   = module.iam.google_project_iam_member.creative_studio_tasks_enqueuer
+}
+
+moved {
+  from = google_project_service_identity.vertex_sa
+  to   = module.iam.google_project_service_identity.vertex_sa
+}
+
+moved {
+  from = google_project_iam_member.vertex_sa_access
+  to   = module.iam.google_project_iam_member.vertex_sa_access
+}
+
+moved {
+  from = google_storage_bucket_iam_member.admins
+  to   = module.iam.google_storage_bucket_iam_member.admins
+}
+
+moved {
+  from = google_storage_bucket_iam_member.creators
+  to   = module.iam.google_storage_bucket_iam_member.creators
+}
+
+moved {
+  from = google_storage_bucket_iam_member.viewers
+  to   = module.iam.google_storage_bucket_iam_member.viewers
+}
+
+moved {
+  from = google_storage_bucket_iam_member.sa_bucket_viewer
+  to   = module.iam.google_storage_bucket_iam_member.sa_bucket_viewer
+}
+
+moved {
+  from = google_storage_bucket_iam_member.sa_object_user
+  to   = module.iam.google_storage_bucket_iam_member.sa_object_user
+}
+
+moved {
+  from = google_project_iam_member.creative_studio_sa_token_creator
+  to   = module.iam.google_project_iam_member.creative_studio_sa_token_creator
+}
+
+moved {
+  from = google_project_iam_member.creative_studio_db_access
+  to   = module.iam.google_project_iam_member.creative_studio_db_access
+}
+
+moved {
+  from = google_project_iam_member.creative_studio_vertex_access
+  to   = module.iam.google_project_iam_member.creative_studio_vertex_access
+}
