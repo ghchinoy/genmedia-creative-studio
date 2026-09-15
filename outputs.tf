@@ -20,7 +20,7 @@ output "load-balancer-ip" {
 }
 
 output "assets-bucket" {
-  value       = google_storage_bucket.assets.name
+  value       = module.data.assets_bucket_name
   description = "Name of the GCS bucket where assets are stored."
 }
 

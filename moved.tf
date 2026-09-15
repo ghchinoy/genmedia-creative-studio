@@ -27,3 +27,39 @@ moved {
   from = null_resource.sleep
   to   = module.apis.null_resource.sleep
 }
+
+# --- data-stores module ---
+moved {
+  from = google_cloud_tasks_queue.thumbnail_queue
+  to   = module.data.google_cloud_tasks_queue.thumbnail_queue
+}
+
+moved {
+  from = google_storage_bucket.assets
+  to   = module.data.google_storage_bucket.assets
+}
+
+moved {
+  from = google_firestore_database.create_studio_asset_metadata
+  to   = module.data.google_firestore_database.create_studio_asset_metadata
+}
+
+moved {
+  from = google_firestore_index.genmedia_library_mime_type_timestamp
+  to   = module.data.google_firestore_index.genmedia_library_mime_type_timestamp
+}
+
+moved {
+  from = google_firestore_index.genmedia_chooser_media_type_timestamp
+  to   = module.data.google_firestore_index.genmedia_chooser_media_type_timestamp
+}
+
+moved {
+  from = google_firestore_index.genmedia_user_email_timestamp
+  to   = module.data.google_firestore_index.genmedia_user_email_timestamp
+}
+
+moved {
+  from = google_firestore_index.genmedia_user_email_mime_type_timestamp
+  to   = module.data.google_firestore_index.genmedia_user_email_mime_type_timestamp
+}

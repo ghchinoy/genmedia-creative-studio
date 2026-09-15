@@ -145,10 +145,15 @@ resource "google_service_account" "creative_studio" {
   account_id = "service-creative-studio"
 }
 
-resource "google_cloud_tasks_queue" "thumbnail_queue" {
-  name       = "thumbnail-extraction"
-  location   = var.region
-  project    = var.project_id
+module "data" {
+  source                   = "./modules/data-stores"
+  project_id               = var.project_id
+  region                   = var.region
+  bucket_name              = local.asset_bucket_name
+  cors_domains             = local.cors_domains
+  enable_data_deletion     = var.enable_data_deletion
+  asset_lifecycle_age_days = var.asset_lifecycle_age_days
+
   depends_on = [module.apis]
 }
 
@@ -181,10 +186,10 @@ locals {
     MEDIA_BUCKET                          = local.asset_bucket_name
     IMAGE_BUCKET                          = local.asset_bucket_name
     GCS_ASSETS_BUCKET                     = local.asset_bucket_name
-    GENMEDIA_FIREBASE_DB                  = google_firestore_database.create_studio_asset_metadata.name
+    GENMEDIA_FIREBASE_DB                  = module.data.firestore_db_name
     SERVICE_ACCOUNT_EMAIL                 = google_service_account.creative_studio.email
     EDIT_IMAGES_ENABLED                   = var.edit_images_enabled
-    THUMBNAIL_QUEUE_ID                    = google_cloud_tasks_queue.thumbnail_queue.name
+    THUMBNAIL_QUEUE_ID                    = module.data.tasks_queue_name
     API_BASE_URL                          = var.api_base_url != "" ? var.api_base_url : (var.use_lb ? "https://${var.domain}" : "")
   }
 
@@ -252,62 +257,32 @@ resource "google_project_iam_member" "vertex_sa_access" {
   member  = google_project_service_identity.vertex_sa.member
 }
 
-resource "google_storage_bucket" "assets" {
-  name                        = local.asset_bucket_name
-  project                     = var.project_id
-  location                    = var.region
-  force_destroy               = var.enable_data_deletion
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
-  default_event_based_hold    = false
-  autoclass {
-    enabled = false
-  }
-  cors {
-    origin          = local.cors_domains
-    method          = ["GET"]
-    response_header = ["Content-Type"]
-    max_age_seconds = 3600
-  }
-  dynamic "lifecycle_rule" {
-    for_each = var.asset_lifecycle_age_days > 0 ? [1] : []
-    content {
-      condition {
-        age = var.asset_lifecycle_age_days
-      }
-      action {
-        type = "Delete"
-      }
-    }
-  }
-}
-
 resource "google_storage_bucket_iam_member" "admins" {
-  bucket = google_storage_bucket.assets.name
+  bucket = module.data.assets_bucket_name
   role   = "roles/storage.objectAdmin"
   member = "user:${var.initial_user}"
 }
 
 resource "google_storage_bucket_iam_member" "creators" {
-  bucket = google_storage_bucket.assets.name
+  bucket = module.data.assets_bucket_name
   role   = "roles/storage.objectCreator"
   member = google_service_account.creative_studio.member
 }
 
 resource "google_storage_bucket_iam_member" "viewers" {
-  bucket = google_storage_bucket.assets.name
+  bucket = module.data.assets_bucket_name
   role   = "roles/storage.objectViewer"
   member = google_service_account.creative_studio.member
 }
 
 resource "google_storage_bucket_iam_member" "sa_bucket_viewer" {
-  bucket = google_storage_bucket.assets.name
+  bucket = module.data.assets_bucket_name
   role   = "roles/storage.bucketViewer"
   member = google_service_account.creative_studio.member
 }
 
 resource "google_storage_bucket_iam_member" "sa_object_user" {
-  bucket = google_storage_bucket.assets.name
+  bucket = module.data.assets_bucket_name
   role   = "roles/storage.objectUser"
   member = google_service_account.creative_studio.member
 }
@@ -318,96 +293,13 @@ resource "google_project_iam_member" "creative_studio_sa_token_creator" {
   member  = google_service_account.creative_studio.member
 }
 
-resource "google_firestore_database" "create_studio_asset_metadata" {
-  name                              = "create-studio-asset-metadata"
-  location_id                       = var.region
-  type                              = "FIRESTORE_NATIVE"
-  concurrency_mode                  = "OPTIMISTIC"
-  app_engine_integration_mode       = "DISABLED"
-  point_in_time_recovery_enablement = "POINT_IN_TIME_RECOVERY_ENABLED"
-  delete_protection_state           = var.enable_data_deletion ? "DELETE_PROTECTION_DISABLED" : "DELETE_PROTECTION_ENABLED"
-  # Terraform docs / testing showed that deletion_policy is needed for db to be delete when using terraform destroy
-  # See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/firestore_database#delete_protection_state-1
-  deletion_policy = var.enable_data_deletion ? "DELETE" : "ABANDON"
-  depends_on      = [module.apis]
-}
-
-resource "google_firestore_index" "genmedia_library_mime_type_timestamp" {
-  collection  = "genmedia"
-  database    = google_firestore_database.create_studio_asset_metadata.name
-  query_scope = "COLLECTION"
-
-  fields {
-    field_path = "mime_type"
-    order      = "ASCENDING"
-  }
-
-  fields {
-    field_path = "timestamp"
-    order      = "DESCENDING"
-  }
-}
-
-resource "google_firestore_index" "genmedia_chooser_media_type_timestamp" {
-  collection  = "genmedia"
-  database    = google_firestore_database.create_studio_asset_metadata.name
-  query_scope = "COLLECTION"
-
-  fields {
-    field_path = "media_type"
-    order      = "ASCENDING"
-  }
-
-  fields {
-    field_path = "timestamp"
-    order      = "DESCENDING"
-  }
-}
-
-resource "google_firestore_index" "genmedia_user_email_timestamp" {
-  collection  = "genmedia"
-  database    = google_firestore_database.create_studio_asset_metadata.name
-  query_scope = "COLLECTION"
-
-  fields {
-    field_path = "user_email"
-    order      = "ASCENDING"
-  }
-
-  fields {
-    field_path = "timestamp"
-    order      = "DESCENDING"
-  }
-}
-
-resource "google_firestore_index" "genmedia_user_email_mime_type_timestamp" {
-  collection  = "genmedia"
-  database    = google_firestore_database.create_studio_asset_metadata.name
-  query_scope = "COLLECTION"
-
-  fields {
-    field_path = "user_email"
-    order      = "ASCENDING"
-  }
-
-  fields {
-    field_path = "mime_type"
-    order      = "ASCENDING"
-  }
-
-  fields {
-    field_path = "timestamp"
-    order      = "DESCENDING"
-  }
-}
-
 resource "google_project_iam_member" "creative_studio_db_access" {
   project = var.project_id
   role    = "roles/datastore.user"
   member  = google_service_account.creative_studio.member
   condition {
     title      = "Access to Create Studio Asset Metadata DB"
-    expression = "resource.name==\"${google_firestore_database.create_studio_asset_metadata.id}\""
+    expression = "resource.name==\"${module.data.firestore_db_id}\""
   }
 }
 
