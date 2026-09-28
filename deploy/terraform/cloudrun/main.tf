@@ -245,9 +245,13 @@ locals {
   #     plan-time knowable, S1+S3 resolve together and land in ONE apply/revision
   #     — with EACH OTHER. CORRECTION (R-14): this used to continue "with the S2
   #     image (atomic co-deploy, constraint #2)". That is FALSE, and is recorded
-  #     here rather than deleted so the original intent stays legible;
-  #     constraint #2 was retracted when deploy/terraform/environments/README.md
-  #     was corrected under R-10. Terraform does not set the image on an
+  #     here rather than deleted so the original intent stays legible.
+  #     Constraint #2 is itself FALSE: it is the "Atomic co-deploy (REQUIRED)"
+  #     contract at deploy/terraform/environments/README.md:102-109, which as of
+  #     THIS commit still stands there, unretracted. R-10 retracts it on branch
+  #     fix/1927-readme-truth, which has NOT landed here — until it does, that
+  #     README still asserts the atomic contract and this comment is the
+  #     nearer-the-code correction. Terraform does not set the image on an
   #     existing service (ignore_changes on template[0].containers[0].image,
   #     ../modules/cloud-run-service/main.tf:131-133); deploy/scripts/deploy.sh
   #     / CD delivers it, so the apply adds these env vars to a NEW revision
