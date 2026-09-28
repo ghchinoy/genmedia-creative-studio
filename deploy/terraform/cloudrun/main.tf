@@ -65,10 +65,28 @@ data "google_project" "project" {
 # Resolution (chosen mechanism): read the ALREADY-EXISTING prod backend service
 # by its deterministic, module-derived name via a data source. Its generated_id
 # is known at PLAN time and the data source does NOT depend on the Cloud Run
-# service or module.networking-lb, so no cycle is formed — the S1(aud)+S3+S2
-# co-deploy stays a single atomic apply / one revision, and the resolved (non-
-# empty) audience is present in that revision before the iap-mode image boots, so
-# the app's FATAL-on-unset-audience path is never reached on a live prod boot.
+# service or module.networking-lb, so no cycle is formed, and the S1(aud)+S3 env
+# vars resolve at plan time and land together in one apply / one revision.
+#
+# CORRECTION (R-14): this passage used to read "— the S1(aud)+S3+S2 co-deploy
+# stays a single atomic apply / one revision". That claim is FALSE. It is
+# recorded here rather than deleted, so the original intent stays legible.
+# Terraform does NOT set the container image (S2) on an EXISTING Cloud Run
+# service: the service resource carries
+#   lifecycle { ignore_changes = [template[0].containers[0].image, client,
+#                                 client_version] }
+# (../modules/cloud-run-service/main.tf:131-133), so an apply never changes the
+# image and var.initial_container_image is inert on that path. The image is
+# delivered separately, by deploy/scripts/deploy.sh / CD. An apply therefore
+# adds the identity env vars to a NEW revision running whatever image CD last
+# pushed — env-before-image, NOT an atomic image+env co-deploy.
+#
+# This is not fail-open: env-before-image is the SAFE order. A resolved,
+# non-empty audience is in place on the revision before any iap-mode image boots
+# on it, so the app's FATAL-on-unset-audience path is still never reached on a
+# live prod boot. What the apply does NOT establish is that the running image is
+# the merged verified-identity build — confirm that separately, by pinning the
+# expected image digest and checking the running revision against it.
 #
 # Name derivation (no hardcoded id/number): the upstream serverless_negs module
 # names the backend service "${name}-backend-${key}"; modules/networking-lb sets
@@ -195,8 +213,17 @@ locals {
   #   - IAP_JWT_AUDIENCE: the native Cloud Run deterministic audience, built from
   #     the project NUMBER (never a hardcoded literal), region, and the static
   #     Cloud Run service name "creative-studio". The app FATALs at boot in iap
-  #     mode if this is unset, which is why this must be applied atomically with
-  #     the S2 image (see deploy docs).
+  #     mode if this is unset. CORRECTION (R-14): this used to conclude "which
+  #     is why this must be applied atomically with the S2 image (see deploy
+  #     docs)". That is FALSE, and is recorded here rather than deleted so the
+  #     original intent stays legible. Terraform does not set the image on an
+  #     existing service (ignore_changes on template[0].containers[0].image,
+  #     ../modules/cloud-run-service/main.tf:131-133); deploy/scripts/deploy.sh
+  #     / CD delivers it, so an apply adds this audience to a NEW revision
+  #     running whatever image CD last pushed. Applying env before image is the
+  #     SAFE order — the audience is set before any iap-mode image boots on it,
+  #     so the FATAL is not reached — but it is NOT an atomic co-deploy, and the
+  #     running revision's image digest must be confirmed separately.
   # Local set that yields the app's local (mock-identity) AUTH_MODE. Kept here so
   # the LOW-3 precondition and the intent above share one source of truth.
   local_app_envs = ["", "dev", "development", "local", "test"]
@@ -216,8 +243,18 @@ locals {
   #     the numeric id resolved cycle-free at PLAN time via the existing-backend-
   #     service data source above (no hardcoded number/id). Because the aud is
   #     plan-time knowable, S1+S3 resolve together and land in ONE apply/revision
-  #     with the S2 image (atomic co-deploy, constraint #2); a resolved non-empty
-  #     aud is always present before the iap image boots (constraint #3).
+  #     — with EACH OTHER. CORRECTION (R-14): this used to continue "with the S2
+  #     image (atomic co-deploy, constraint #2)". That is FALSE, and is recorded
+  #     here rather than deleted so the original intent stays legible;
+  #     constraint #2 was retracted when deploy/terraform/environments/README.md
+  #     was corrected under R-10. Terraform does not set the image on an
+  #     existing service (ignore_changes on template[0].containers[0].image,
+  #     ../modules/cloud-run-service/main.tf:131-133); deploy/scripts/deploy.sh
+  #     / CD delivers it, so the apply adds these env vars to a NEW revision
+  #     running whatever image CD last pushed. Constraint #3 DOES still hold,
+  #     but by ORDERING, not by atomicity: a resolved non-empty aud is present
+  #     before the iap image boots because env-before-image is the safe order.
+  #     Confirm the running revision's image digest separately.
   prod_identity_env_vars = {
     APP_ENV                    = var.environment
     REQUIRE_AUTHENTICATED_USER = "true"
@@ -232,6 +269,20 @@ locals {
   cors_domains    = concat(local.deployed_domain, var.allow_local_domain_cors_requests ? ["http://localhost:8080", "http://0.0.0.0:8080"] : [])
 }
 
+# IMAGE DELIVERY — read this before the `image` argument below. Terraform does
+# NOT set the container image on an EXISTING Cloud Run service, and image + env
+# are NOT co-deployed atomically. The service resource carries
+#   lifecycle { ignore_changes = [template[0].containers[0].image, client,
+#                                 client_version] }
+# (../modules/cloud-run-service/main.tf:131-133), so on an existing service an
+# apply never changes the image, and the value passed as `image` below
+# (var.initial_container_image) is INERT on that path — it is honoured only when
+# the service is first created. The image is delivered separately, by
+# deploy/scripts/deploy.sh / CD, so an apply adds the identity env vars above to
+# a NEW revision running whatever image CD last pushed. Applying env before
+# image is the SAFE order, so this is not fail-open — but the operator MUST
+# separately confirm that the running revision's image digest is the intended
+# merged verified-identity build.
 module "cloud-run-service" {
   source             = "../modules/cloud-run-service"
   project_id         = var.project_id
