@@ -115,9 +115,9 @@ change.
   `lifecycle { ignore_changes = [template[0].containers[0].image, ...] }`
   (`modules/cloud-run-service/main.tf:131-133`), so on an **existing** service an
   apply never changes the image and `var.initial_container_image` is inert on that
-  path. The image is delivered separately, by `deploy.sh` / CD. An apply therefore
-  adds the three env vars to a **new revision running whatever image is currently
-  deployed**.
+  path. The image is delivered separately, by `deploy/scripts/deploy.sh` / CD.
+  An apply therefore adds the three env vars to a **new revision running
+  whatever image is currently deployed**.
 - **Confirm the image separately (REQUIRED).** Because the apply does not carry
   the image, the operator MUST separately confirm that the running revision serves
   the intended merged verified-identity build — pin the expected build's image
