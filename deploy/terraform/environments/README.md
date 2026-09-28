@@ -85,39 +85,62 @@ keeps "which environment am I about to touch" visible on every command.
 
 ## Vuln #4: verified-identity env contract & apply ordering
 
-**Both** environments set the same three verified-identity env vars on the Cloud
-Run service (`APP_ENV`, `REQUIRE_AUTHENTICATED_USER`, `IAP_JWT_AUDIENCE`), and in
-both `APP_ENV` resolves to a non-local value so the app derives `AUTH_MODE='iap'`.
+**Both Cloud Run environments** — nonprod/staging and prod — set the same three
+verified-identity env vars on the Cloud Run service (`APP_ENV`,
+`REQUIRE_AUTHENTICATED_USER`, `IAP_JWT_AUDIENCE`), and in both `APP_ENV` resolves
+to a non-local value so the app derives `AUTH_MODE='iap'`.
 They differ only in the **form of the audience**, because they differ in topology.
 They remain separate applies against separate state, so each environment is rolled
 independently and on its own schedule:
 
-| Path | Audience form | Fail-closed guard | Rolled in |
+| Path | Audience form | Fail-closed guard | Rolled by |
 | :-- | :-- | :-- | :-- |
-| nonprod (`use_lb = false`), native Cloud Run | `/projects/<number>/locations/<region>/services/creative-studio` | `terraform_data.nonprod_app_env_guard` | the nonprod/staging phase |
+| nonprod (`use_lb = false`), native Cloud Run | `/projects/<number>/locations/<region>/services/creative-studio` | `terraform_data.nonprod_app_env_guard` | a separate nonprod/staging apply |
 | prod (`use_lb = true`), behind the LB | `/projects/<number>/global/backendServices/<generated_id>` | `terraform_data.prod_app_env_guard` | **this phase** — see below |
+
+**Scope: "both environments" means the two Cloud Run environments above.** The GKE
+deploy root (`deploy/terraform/gke/`) is **out of this contract**: it sets none of
+the three identity env vars and has no `*_app_env_guard`, and nothing in this
+directory changes that. Extending the contract to the GKE root is a separate
+change.
 
 ### Contract rules (both paths)
 
-- **Atomic co-deploy (REQUIRED).** In `iap` mode the app FATALs at boot if
+- **Terraform does NOT set the container image — image and env are NOT
+  co-deployed atomically.** In `iap` mode the app FATALs at boot if
   `IAP_JWT_AUDIENCE` is unset, and once `REQUIRE_AUTHENTICATED_USER=true` the
-  service rejects any request without a verified identity. These env vars MUST
-  therefore land in the **same Cloud Run revision as the app image that reads
-  them** — i.e. a single `terraform apply` where `var.initial_container_image`
-  points at the merged verified-identity build, so image + env render into one
-  `google_cloud_run_v2_service` spec / one revision. Never apply these env vars
-  before that image exists, and never split image and env across two updates.
+  service rejects any request without a verified identity — so these env vars are
+  only meaningful on a revision that is running the merged verified-identity app
+  image. Terraform cannot pair them for you: the Cloud Run resource carries
+  `lifecycle { ignore_changes = [template[0].containers[0].image, ...] }`
+  (`modules/cloud-run-service/main.tf:131-133`), so on an **existing** service an
+  apply never changes the image and `var.initial_container_image` is inert on that
+  path. The image is delivered separately, by `deploy.sh` / CD. An apply therefore
+  adds the three env vars to a **new revision running whatever image is currently
+  deployed**.
+- **Confirm the image separately (REQUIRED).** Because the apply does not carry
+  the image, the operator MUST separately confirm that the running revision serves
+  the intended merged verified-identity build — pin the expected build's image
+  **digest** and check the running revision against it. Until that check passes,
+  the env vars being correct does **not** mean the service is remediated.
 - **Fail-closed guard.** A `terraform_data.<path>_app_env_guard` precondition
   fails the plan/apply if `APP_ENV` resolves to a local-mode value (`""`, `dev`,
   `development`, `local`, `test`), preventing a silent fail-open (mock identity)
   misconfiguration. Each guard is count-gated to its own path, so the nonprod
   guard is inert on prod and vice versa.
-- **Post-apply fail-closed smoke (owner-run, do NOT run from CI/agents).** After
-  the atomic apply, confirm the service fails **closed**: (1) a request to the
-  service's entry point (the Cloud Run URL on nonprod, the LB domain on prod)
-  lacking a valid `X-Goog-IAP-JWT-Assertion` is rejected (not served an
-  authenticated page); (2) the running revision resolves `APP_ENV` to the
-  non-local value (so `AUTH_MODE='iap'`) and has a non-empty `IAP_JWT_AUDIENCE`.
+- **Post-apply checks (owner-run, do NOT run from CI/agents).** After the apply,
+  confirm: (1) a request to the service's entry point (the Cloud Run URL on
+  nonprod, the LB domain on prod) lacking a valid `X-Goog-IAP-JWT-Assertion` is
+  rejected (not served an authenticated page); (2) the running revision resolves
+  `APP_ENV` to the non-local value (so `AUTH_MODE='iap'`) and has a non-empty
+  `IAP_JWT_AUDIENCE`. **Neither check distinguishes a remediated service from a
+  still-vulnerable one:** both also pass on a revision whose env vars are correct
+  but whose image predates the verified-identity fix — check (1) because the older
+  code also rejects a request carrying no identity header, and check (2) because it
+  inspects env vars only, never the image. The discriminating checks (the running
+  revision's image digest pinned to the merged build, plus a negative test that a
+  **spoofed plaintext identity header** is rejected) belong to the Phase-5 rollout
+  runbooks and are not reproduced here.
 
 ### nonprod (`use_lb = false`) — native Cloud Run audience
 
