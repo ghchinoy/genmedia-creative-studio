@@ -1,3 +1,12 @@
+> ⚠️ **STAGING / REVIEW ONLY. This branch is NEVER merged to `main`.** It exists so the ADK
+> Genmedia blog series can be read with rendered images (hero illustrations + Graphviz diagrams)
+> for the coordinator and owner's **cycle-7 completeness review**. It is NOT a publication: the real
+> venue is **Medium + the Google Developers forum**, and the durable source of truth is the team
+> scratchpad, not this repo. Diagram embeds on this branch point at PNG copies so GitHub renders
+> them reliably; the canonical posts use SVG. The new Tier-0 post's hero illustration is a known,
+> declared gap (no placeholder, stub, or borrowed image is committed). Start with
+> [`00-overview.md`](00-overview.md), then the Tier-0 doorway, and read the nine posts below in order.
+
 # ADK Genmedia Series — blog (index)
 
 The devrel **blog series** that runs alongside the ADK genmedia example code, maintained **in
@@ -13,7 +22,7 @@ their diagrams, illustration art-direction, and the shared visual identity.
   (https://discuss.google.dev/c/google-cloud/14). This scratchpad `blog/` is the durable **source of
   truth**; the Medium/forum versions are rendered from it. Written toward Medium article format
   (strong hero image, outcome-selling headline, scannable sections).
-- **Source of truth:** `GoogleCloudPlatform/vertex-ai-creative-studio` @ `main`. Every post
+- **Source of truth:** `GoogleCloudPlatform/genmedia-creative-studio` @ `main`. Every post
   describes code that is **merged**, and every capability/setting/behavior is verified against the
   shipped agent and a real credentialed run — never a design doc or PR description.
 - **Cadence:** a post goes live only after its agent is merged *and* passes a real credentialed run.
@@ -32,7 +41,8 @@ their diagrams, illustration art-direction, and the shared visual identity.
 
 | # | Tier | Post | Agent (merged) | Diagram | Illustration | Post status |
 |---|------|------|----------------|---------|--------------|-------------|
-| 0 | — | [00-overview](00-overview.md) | — | `series-arc` ✅ | art-direction ✅ / render ✅ | **draft (this cycle)** |
+| — | — | [00-overview](00-overview.md) | — | `series-arc` ✅ | art-direction ✅ / render ✅ | **draft** |
+| 0 | tier0 | [tier0-01-meet-your-studio](tier0-01-meet-your-studio.md) | PR #1811 ✅ | `tier0-doorway` ✅ | — (hero: known gap, deferred) | **draft (new, cycle 7)** |
 | 1 | crawl | [crawl-01-photoshoot](crawl-01-photoshoot.md) | PR #1812 ✅ | `photoshoot` ✅ | art-direction ✅ / render ✅ | **draft (this cycle)** |
 | 2 | crawl | [crawl-02-director](crawl-02-director.md) | PR #1814 ✅ | `director` ✅ | art-direction ✅ / render ✅ | **draft (this cycle)** |
 | 3 | crawl | [crawl-03-music-producer](crawl-03-music-producer.md) | PR #1815 ✅ | `music-producer` ✅ | art-direction ✅ / render ✅ | **draft** |
@@ -41,19 +51,21 @@ their diagrams, illustration art-direction, and the shared visual identity.
 | 6 | run (dogfood) | [run-02-creative-studio-dogfood](run-02-creative-studio-dogfood.md) | PR #1823 ✅ | `creative-studio-dogfood` ✅ | art-direction ✅ / render ✅ | **draft** |
 | 7 | run | [run-03-editor-qc-room](run-03-editor-qc-room.md) | PR #1824 ✅ | `editor-qc-room` ✅ | art-direction ✅ / render ✅ | **draft (this cycle)** |
 
-Legend: ✅ done · ⏳ pending/merging. **All eight series hero illustrations** (crawl ×4, walk ×1, run
+Legend: ✅ done · ⏳ pending/merging. **All eight series hero illustrations** (overview ×1, crawl ×3, walk ×1, run
 ×3) are now **real existence-verified renders** (2752×1536 PNG, produced on the credentialed genmedia
 stack via the EM render channel and theme-compliance-reviewed by the archivist) dropped beside their
-art-direction in [`illustrations/`](illustrations/). No placeholder was ever committed.
+art-direction in [`illustrations/`](illustrations/). No placeholder was ever committed. The new Tier-0
+post (cycle 7) ships text + a Graphviz diagram only; its hero illustration is a **known gap**, deferred
+to the credentialed render channel (no placeholder committed).
 
 ## The through-line (map)
 
 The series is a single numbered path; each step adds **exactly one** ADK construct on top of the
 last, while Gemini's reasoning stays front-and-centre from the very first agent. (Rendered:
-[`diagrams/series-arc.svg`](diagrams/series-arc.png).)
+[`diagrams/series-arc.png`](diagrams/series-arc.png).)
 
-1. **Meet ADK** → the refreshed Tier-0 `adk/` sample — *an agent is an `LlmAgent` + `MCPToolset`s;
-   the LLM drives across many tools.* (PR #1811)
+1. **Meet your studio** → [the refreshed Tier-0 `adk/` sample](tier0-01-meet-your-studio.md) — *an
+   agent is an `LlmAgent` + `MCPToolset`s; the LLM drives across many tools.* (PR #1811)
 2. **Your first genmedia agent** → **Photoshoot** — *one `LlmAgent` + one `MCPToolset`
    (`tool_filter`); output modes + verify-by-existence.* (PR #1812)
 3. **Now with video** → **Director / Videographer** — *same shape, video; explicit Veo-3 model to
@@ -64,13 +76,13 @@ last, while Gemini's reasoning stays front-and-centre from the very first agent.
    state passing between agents.* (PR #1816 ✅ — **walk tier begins**)
 6. **A real multi-agent app** → **Ad creative-director's assistant** — *`SequentialAgent` ⊃
    `ParallelAgent` + `AgentTool`, composing the persona agents; `output_schema` plan.* (PR #1821 ✅
-   — **run tier / finale: the arc's payoff**)
+   — **run tier begins: the arc's payoff**)
 7. **The studio that documents itself** → **Creative Studio (dogfood)** — *a second `storyboard`
    profile on the same engine (the `build_root_agent(profile)` seam) + a headless, deterministic
    packager that emits a versioned `manifest.json` verified by existence.* (PR #1823 ✅ — **dogfood:
    the studio packages its own output for downstream tools**)
-8. **The editor who checks the work** → **Editor's QC Room** — *an optional, bounded `LoopAgent`
-   self-critique stage: the assembler builds, a critic MEASURES the cut (ffprobe) and either escalates
+8. **The editor who checks the work** → **Editor's QC Room** — *an optional (shipped enabled in both
+   profiles), bounded `LoopAgent` self-critique stage: the assembler builds, a critic MEASURES the cut (ffprobe) and either escalates
    to stop or sends correction notes for one more pass, hard-capped by `max_iterations`.* (PR #1824 ✅
    — **the series' last ADK construct: self-correction, guaranteed to end**)
 

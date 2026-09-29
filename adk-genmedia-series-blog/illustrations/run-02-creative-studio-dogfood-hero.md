@@ -1,8 +1,8 @@
 # Art-direction — Creative Studio (dogfood) hero (run tier / dogfood, post 6)
 
 - **Post:** `run-02-creative-studio-dogfood.md`
-- **Placement:** top hero, full-width. This is the **final post** in the series — the "studio that
-  documents itself." It should feel like the same studio as the finale, but now producing a **tidy,
+- **Placement:** top hero, full-width. This is the **Creative Studio dogfood post** — the "studio that
+  documents itself." It should feel like the same studio as the capstone, but now producing a **tidy,
   labelled, machine-readable package** rather than a single hero video.
 - **Aspect ratio:** 16:9 · **image_size:** 2K · **output_filename:** `run-02-creative-studio-dogfood-hero.png`
 - **Anchor axis colour:** **indigo/purple** structure (same engine, a profile switch) with a strong
@@ -57,7 +57,7 @@ panels at **three** to match the storyboard profile's `MAX_SHOTS=3` / stills-onl
 manifest is the dogfood point: a machine consuming a stable contract.
 
 ## Persona-continuity note
-Reuse the established flat-vector studio look so this reads as the *same* studio from the finale, now
+Reuse the established flat-vector studio look so this reads as the *same* studio from the capstone, now
 in "documentation mode." No new human personas are required (this is a headless tool) — if a figure
 is shown, keep it a small editor/operator consistent with the cast. The red-umbrella motif may appear
 faintly inside one still panel as a series callback, but the subject is generic; the star is the

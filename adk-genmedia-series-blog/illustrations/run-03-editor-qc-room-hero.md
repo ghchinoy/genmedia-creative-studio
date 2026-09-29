@@ -2,7 +2,7 @@
 
 - **Post:** `run-03-editor-qc-room.md`
 - **Placement:** top hero, full-width. This is the **series' final teaching post** — the optional
-  self-critique **LoopAgent**. It should feel like the same studio as the finale, now with one more
+  self-critique **LoopAgent**. It should feel like the same studio as the capstone, now with one more
   role at work: an **editor who checks the cut, catches one flaw, sends it back for a single fix, and
   stamps it approved**. The emotional beat is *trustworthy self-correction on a leash* — calm and
   precise, not anxious.
@@ -58,7 +58,7 @@ Keep the "send it back" pass to a **single** orange return arrow so the leash/bo
 this is self-correction that is *safe because it ends*, not an anxious infinite spin.
 
 ## Persona-continuity note
-Reuse the established flat-vector studio look so this reads as the *same* studio from the finale, now
+Reuse the established flat-vector studio look so this reads as the *same* studio from the capstone, now
 in "final-check mode." The editor may be the same editor figure who assembled the cut in the run-01
 hero. The red-umbrella motif may appear faintly inside the filmstrip being reviewed as a series
 callback, but the subject is generic; the star is the **green approved stamp + the measured loop**, not

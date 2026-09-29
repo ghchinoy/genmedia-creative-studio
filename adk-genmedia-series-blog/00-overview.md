@@ -2,18 +2,18 @@
 title: "Your own AI creative studio: from a one-line brief to a full set of on-brand assets"
 slug: adk-genmedia-series-overview
 series: ADK Genmedia Series
-part: 0
+part: intro
 status: draft
 audience: creative builders — marketers, brand & content teams, creative technologists
 register: Think With Google (creative, outcome-first)
 hero: illustrations/00-overview-hero.png
-diagram: diagrams/series-arc.svg
+diagram: diagrams/series-arc.png
 source_of_truth: >
-  GoogleCloudPlatform/vertex-ai-creative-studio @ main.
+  GoogleCloudPlatform/genmedia-creative-studio @ main.
   Grounded on merged PRs #1811 (Tier-0), #1812 (Photoshoot), #1814 (Director), #1815 (Music
-  Producer), #1816 (Scriptwriter/Storyboarder), #1821 (Ad creative-director — run-tier finale),
+  Producer), #1816 (Scriptwriter/Storyboarder), #1821 (Ad creative-director — run-tier capstone),
   #1823 (Creative Studio — storyboard-profile dogfood tool),
-  #1824 (Editor's QC Room — optional self-critique LoopAgent).
+  #1824 (Editor's QC Room — optional self-critique LoopAgent, ships enabled in both profiles).
 ---
 
 # Your own AI creative studio: from a one-line brief to a full set of on-brand assets
@@ -60,7 +60,7 @@ not a gamble.
 
 | # | Step | The creative job it does | Status |
 |---|------|--------------------------|--------|
-| 0 | **Meet your studio** — the refreshed [`sample-agents/adk`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/tree/main/experiments/mcp-genmedia/sample-agents/adk) | one collaborator that can reach for many creative tools | ✅ shipped (#1811) |
+| 0 | **Meet your studio** — [the doorway sample](tier0-01-meet-your-studio.md), the refreshed [`sample-agents/adk`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/tree/main/experiments/mcp-genmedia/sample-agents/adk) | one agent that can reach for every creative tool | ✅ shipped (#1811) |
 | 1 | **The Photoshoot** — [your first agent](crawl-01-photoshoot.md) | a one-line idea → a richly art-directed, on-brand image | ✅ shipped (#1812) |
 | 2 | **The Director** — [now it moves](crawl-02-director.md) | a scene → a short cinematic clip, with sound, in the right format | ✅ shipped (#1814) |
 | 3 | **The Music Producer** — [give it a soundtrack](crawl-03-music-producer.md) | a brief → an original music bed + voiceover, mixed into one track | ✅ shipped (#1815) |
@@ -111,14 +111,14 @@ model you have access to and you're off.
 
 ## Start here
 
-Your first collaborator is the Photoshoot: give it a sentence, get back an art-directed image you'd
-be happy to put in front of a brand team.
+Start at the doorway: the simplest version of the whole idea, one agent wired to every creative tool,
+before any of the personas. Then meet your first specialist, the Photoshoot.
 
-**→ [The Photoshoot: your first creative collaborator](crawl-01-photoshoot.md)**
+**→ [Meet your studio: one agent, every creative tool](tier0-01-meet-your-studio.md)**
 
 ---
 
 <sub>Part of the **ADK Genmedia Series**. Source of truth is the merged code on
-`GoogleCloudPlatform/vertex-ai-creative-studio@main`; every capability, setting, and behavior
+`GoogleCloudPlatform/genmedia-creative-studio@main`; every capability, setting, and behavior
 described here is verified against the shipped agents and a real credentialed run, never a design
 doc. Visual identity: `blog/graphic-theme.md`.</sub>

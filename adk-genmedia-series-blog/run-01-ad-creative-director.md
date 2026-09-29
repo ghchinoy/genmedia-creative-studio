@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1821 (squash-merge a8ce2df on main) — feat(adk-series): Ad creative-director capstone (SequentialAgent ⊃ ParallelAgent + AgentTool)"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/
 hero: illustrations/run-01-ad-creative-director-hero.png
-diagram: diagrams/ad-creative-director.svg
+diagram: diagrams/ad-creative-director.png
 three_fold: { adk: High, mcp: High, gemini: High }
 ---
 
@@ -18,12 +18,12 @@ three_fold: { adk: High, mcp: High, gemini: High }
 
 ![A creative director hands a one-paragraph brand brief to a studio; three shot teams work in parallel on stills and clips while a musician scores it, and an editor assembles one finished ad on the timeline](illustrations/run-01-ad-creative-director-hero.png)
 
-Here is the brief you'd normally hand to a whole team:
+The brief you'd normally hand to a whole team:
 
 > *Make a 20-second ad for **Aurora**, a canned cold-brew coffee. Bright and optimistic,
 > morning-city energy, and end on a clean shot of the can with the tagline "Mornings, brightened."*
 
-And here is what comes back: **one finished short video ad** (`final_ad.mp4`) with a planned set
+What comes back: **one finished short video ad** (`final_ad.mp4`) with a planned set
 of hero shots, a still and a motion clip for each, a music bed, a voiceover, and everything mixed
 and cut to length. Not a mood board. Not a folder of clips for you to assemble. A single assembled
 ad, within the duration you asked for, every piece verified to exist.
@@ -95,6 +95,8 @@ root_agent = SequentialAgent(name="ad_creative_director_ad", sub_agents=[
 ])
 ```
 
+*(Condensed from the shipped [`ad_creative_director/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/ad_creative_director/agent.py). What ships today goes one step further than this four-stage teaching shape. In [`profiles.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/ad_creative_director/profiles.py) the `Profile` field `enable_qc` defaults to `False`, but **both** shipped profiles set it to `True`, so the agent you actually run when you open `adk web` wraps that final `assembler` in a self-checking QC loop as its fourth stage. That loop is the subject of the last post, [The Editor's QC Room](run-03-editor-qc-room.md); here we build up to it by meeting the assembler on its own.)*
+
 ![How it works: your brief → the planner writes a schema-checked AdPlan → three shot teams run in parallel (each: Photoshoot still → Director clip) → the Music Producer scores it → the assembler cuts, mixes, trims, and verifies one final ad](diagrams/ad-creative-director.png)
 
 Two ideas in that picture are worth a closer look, because they're what make the output *reliable*.
@@ -141,6 +143,8 @@ a small, clearly labeled step that keeps both the music and the voice, and never
 doesn't expose the one setting you need. The honest move (the one this build models) is a small,
 well-labeled local step, not pretending the gap isn't there.
 
+*(This is the always-trim assembler in its pre-QC form. With the QC loop on (the shipped default), this exact trim becomes the seam the critic watches: the loop's first pass deliberately skips it so the overrun gets caught, then a second pass applies it and re-checks. [The Editor's QC Room](run-03-editor-qc-room.md) shows that on camera, so the two posts describe the same seam from two angles, not two different behaviors.)*
+
 ## Try it
 
 ```bash
@@ -186,17 +190,17 @@ Across the whole series, **it only claims what it can point to.**
   capstone re-expresses that shape in ADK's building blocks; read the workflow for the deeper
   composition craft. (Complements the demos, never forks them.)
 - **The `story-generator` skill** — its "writers' room → generate every scene" shape, and its
-  self-critique "QC room," are the storytelling craft behind the planner and a natural future
-  quality-check stage. Read it for the technique; this agent is a runnable ADK surface of the same
-  idea.
+  self-critique "QC room," are the storytelling craft behind the planner and the quality-check stage
+  that ships in [The Editor's QC Room](run-03-editor-qc-room.md). Read it for the technique; this agent
+  is a runnable ADK surface of the same idea.
 
 ## Next
 
-You've reached the finale: a brand brief becomes a finished, on-brand ad, built entirely from the
-collaborators you assembled one at a time. Head back to the [series overview](00-overview.md) to see
-the whole arc, from a single specialist to a full creative studio. From here the natural extensions
-build directly on what you just saw: an automatic quality-check pass on each shot, or a second
-director "profile" that produces a different kind of cut from the same crew.
+From here the same crew keeps going, on the same engine. Next, the director takes a different kind of
+brief and returns not a single ad but an editorial storyboard package a machine can read:
+**[The Creative Studio that documents itself](run-02-creative-studio-dogfood.md)**. Or head back to the
+[series overview](00-overview.md) to see the whole arc, from a single specialist to a full creative
+studio.
 
 ---
 

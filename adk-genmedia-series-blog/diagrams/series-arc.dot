@@ -36,6 +36,8 @@ digraph series_arc {
     fontname="Space Grotesk"; fontsize=13; fontcolor="#5B4FE9";
     color="#9AA5B1"; style="rounded"; bgcolor="#F1F3F4";
     r1 [label="5 · Ad creative-director's assistant\nSequentialAgent ⊃ ParallelAgent\n+ AgentTool (composes 1–3)"];
+    r2 [label="6 · Creative Studio (dogfood)\nsecond profile + headless packager\n(deterministic manifest)"];
+    r3 [label="7 · Editor's QC Room\noptional LoopAgent self-critique\n(bounded, self-correcting)"];
   }
 
   // MCP breadth annotations (teal) attached under the agents that peak on it
@@ -48,11 +50,11 @@ digraph series_arc {
   // Gemini-reasoning callouts (amber) at the ends to show it stays HIGH throughout
   node [shape=ellipse, style="filled", fillcolor="#FDF0CE", color="#F9A825", fontsize=9];
   g_start [label="Gemini art-directs\nfrom the very first agent"];
-  g_end   [label="Gemini plans a\nduration-budgeted ad"];
+  g_end   [label="Gemini judges the cut\nfrom the measurements"];
 
   // ---- Arc flow ----
   edge [color="#1F2933"];
-  t0 -> p1 -> p2 -> p3 -> w1 -> r1 [label="+1 construct"];
+  t0 -> p1 -> p2 -> p3 -> w1 -> r1 -> r2 -> r3 [label="+1 construct"];
 
   // MCP breadth (teal dashed, no arrowhead)
   edge [style=dashed, color="#00A39C", arrowhead=none, fontcolor="#00A39C"];
@@ -60,7 +62,7 @@ digraph series_arc {
 
   // Gemini stays high at both ends (amber dashed)
   edge [style=dashed, color="#F9A825", arrowhead=none, fontcolor="#F9A825"];
-  p1 -> g_start; r1 -> g_end;
+  p1 -> g_start; r3 -> g_end;
 
   // ---- Legend ----
   subgraph cluster_legend {

@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1816 (merge commit 05e005a on main) — feat(adk-series): Scriptwriter/Storyboarder walk-tier SequentialAgent pipeline"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/scriptwriter-storyboarder/
 hero: illustrations/walk-01-scriptwriter-storyboarder-hero.png
-diagram: diagrams/scriptwriter-storyboarder.svg
+diagram: diagrams/scriptwriter-storyboarder.png
 three_fold: { adk: High, mcp: Med, gemini: High }
 ---
 
@@ -70,7 +70,7 @@ root_agent = SequentialAgent(               # run the writer, THEN the artist
 ```
 
 *(Condensed from the shipped
-[`scriptwriter_storyboarder/agent.py`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/scriptwriter-storyboarder/scriptwriter_storyboarder/agent.py).)*
+[`scriptwriter_storyboarder/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/scriptwriter-storyboarder/scriptwriter_storyboarder/agent.py).)*
 Notice the Storyboarder reuses the exact same image tool you gave the Photoshoot in step 1: you're
 not learning new equipment here, you're learning how collaborators hand work to each other.
 
@@ -147,11 +147,10 @@ inventing a file.
 
 ## Next
 
-You've gone from single collaborators to a two-person team that hands work down the line. The finale
-brings the whole crew together: **the creative director's assistant**. A brief fans out to the
-Photoshoot, the Director, and the Music Producer working *in parallel*, then assembles their output
-into one coordinated set of campaign assets. *(Publishing once it ships and its credentialed run
-passes.)*
+You've gone from single collaborators to a two-person team that hands work down the line. Next, the
+whole crew comes together: **[The Creative Director's Assistant](run-01-ad-creative-director.md)**. A
+brief fans out to the Photoshoot, the Director, and the Music Producer working *in parallel*, then
+assembles their output into one coordinated set of campaign assets.
 
 ---
 

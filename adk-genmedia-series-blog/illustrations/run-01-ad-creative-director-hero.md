@@ -1,7 +1,7 @@
-# Art-direction — Ad creative-director's assistant hero (run tier / finale)
+# Art-direction — Ad creative-director's assistant hero (run tier / capstone)
 
 - **Post:** `run-01-ad-creative-director.md`
-- **Placement:** top hero, full-width. This is the **series finale** hero — it should read as the
+- **Placement:** top hero, full-width. This is the **run-tier capstone** hero — it should read as the
   whole studio finally working together, the visual payoff of crawl → walk → run.
 - **Aspect ratio:** 16:9 · **image_size:** 2K · **output_filename:** `run-01-ad-creative-director-hero.png`
 - **Anchor axis colour:** balanced but **indigo-led** structure (ADK's `SequentialAgent ⊃

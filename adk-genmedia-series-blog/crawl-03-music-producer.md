@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1815 (commit 8979c9f) — feat(adk-series): Music Producer crawl multi-server agent"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/music-producer/
 hero: illustrations/crawl-03-music-producer-hero.png
-diagram: diagrams/music-producer.svg
+diagram: diagrams/music-producer.png
 three_fold: { adk: High, mcp: High, gemini: Med }
 ---
 
@@ -58,7 +58,7 @@ root_agent = LlmAgent(
 ```
 
 *(Condensed from the shipped
-[`music-producer/music_producer/agent.py`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/music-producer/music_producer/agent.py)
+[`music-producer/music_producer/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/music-producer/music_producer/agent.py)
 , each toolset is the same simple shape as the Photoshoot's, just three of them.)* The only
 new idea is that little `tool_name_prefix`: a name tag on each piece of gear.
 
@@ -85,7 +85,7 @@ ignored: the classic "why did nothing happen?" moment.
 
 You don't have to hold any of this in your head. The agent knows the exact dials for its own three
 tools, and there's a plain-English crosswalk
-([`NAMING.md`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md))
+([`NAMING.md`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md))
 if you ever want to look under the hood. This is the payoff of the "small thing" the Photoshoot and
 Director flagged: with three tools in one room, the crosswalk is what keeps them in tune.
 
@@ -140,9 +140,8 @@ on a real deadline.
 
 That's the **crawl tier complete**: you can now brief a collaborator for a still image, a short film
 with sound, and a fully mixed audio track. Next, your collaborators start working *as a team*:
-**Scriptwriter / Storyboarder** takes an idea, writes the script, and hands it cleanly to the
-storyboard, your first real creative pipeline. *(Publishing once it ships and its credentialed run
-passes.)*
+**[The Scriptwriter & Storyboarder](walk-01-scriptwriter-storyboarder.md)** takes an idea, writes the
+script, and hands it cleanly to the storyboard, your first real creative pipeline.
 
 ---
 

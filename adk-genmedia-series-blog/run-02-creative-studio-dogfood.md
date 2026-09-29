@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1823 (squash-merge 31f00b04 on main) — feat(creative-studio): storyboard profile + headless package/manifest dogfood tool on the ad-creative-director engine"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/
 hero: illustrations/run-02-creative-studio-dogfood-hero.png
-diagram: diagrams/creative-studio-dogfood.svg
+diagram: diagrams/creative-studio-dogfood.png
 three_fold: { adk: High, mcp: Med, gemini: High }
 ---
 
@@ -61,7 +61,7 @@ root_agent = build_root_agent(AD_PROFILE)   # `adk web` still opens the ad studi
 ```
 
 *(Condensed from the shipped
-[`profiles.py`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/ad_creative_director/profiles.py).
+[`profiles.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/ad_creative_director/profiles.py).
 The storyboard profile also reuses your Scriptwriter from chapter 5 as its beat author: a
 collaborator reused inside a collaborator.)*
 
@@ -120,19 +120,18 @@ the lighthouse run, trimmed:
 
 Two design choices make this trustworthy, and both are the series' habits taken to their logical end:
 
-**The index is written by a plain, non-AI function, not the model.** The creative work is done by
-the AI collaborators; the *bookkeeping* is done by a small, deterministic piece of ordinary code. It
-walks the plan, works out which files should exist, and checks each one **by looking for it
-on disk**, never by trusting a "here's your file" response. Provenance fields like the model name
-and the media-toolkit version are stamped in the same deterministic way, from the real environment. So the manifest reflects what was used.
+**The index is written by a plain, non-AI function, not the model.** The creative work is done by the
+AI collaborators; the *bookkeeping* is done by a small piece of deterministic code. It walks the plan,
+works out which files should exist, and checks each one **by looking for it on disk**, never by trusting
+a "here's your file" response. Provenance fields like the model name and the toolkit version are stamped
+the same way, from the real environment, so the manifest reflects what was used.
 
-**"Verified" means the file is there, or the whole run fails.** Every panel and track carries
-its own `verified` flag. The top-level `artifacts_verified` is true **only if every single file
-exists**. If anything is missing, the command **exits with an error** and the manifest
-records which files weren't there. There are **no placeholders, ever**: a missing file is a hard
-failure, not a stand-in. (This behavior is locked down with unit tests that deliberately delete a
-panel, drop a track, or hand it an empty plan, and confirm the packager refuses to call any of them a
-success.)
+**"Verified" means the file is there, or the whole run fails.** Every panel and track carries its own
+`verified` flag, and the top-level `artifacts_verified` is true **only if every single file exists**. If
+anything is missing, the command **exits with an error** and the manifest records which files weren't
+there. There are **no placeholders, ever**: a missing file is a hard failure, not a stand-in. (Unit
+tests lock this down: they delete a panel, drop a track, or hand it an empty plan, and confirm the
+packager refuses to call any of them a success.)
 
 *Powerful, made approachable:* a downstream tool never has to open the studio's internals or trust a
 chat log. It reads one small, stable, versioned file and knows (provably) what it's been handed.
@@ -158,16 +157,16 @@ tells their own story.
 
 ## Next
 
-You've reached the end of the arc: from a single creative specialist to a full studio, and finally to
-a studio that packages its own output for other tools to build on. Head back to the
-[series overview](00-overview.md) to see the whole path at a glance. From here the natural extensions
-build directly on the profile seam you just saw: an automatic quality-check pass on each panel, or a
-third profile for a new kind of story (all on the same unchanged engine).
+There's one more thing this studio learned to do on the same engine: check and correct its own work
+before handing it over. Next, a self-critiquing pass wraps the assembler in a bounded loop that
+measures each cut and fixes it when it's off: **[The Editor's QC Room](run-03-editor-qc-room.md)**, the
+series' last construct. Or head back to the [series overview](00-overview.md) to see the whole path at
+a glance.
 
 ---
 
 <sub>Grounded on merged PR **#1823** (squash-merge `31f00b04` on `main`; content verified against the
-shipped tree at `ad-creative-director/`). This is the 6th/final series agent — a second `storyboard`
+shipped tree at `ad-creative-director/`). This is the sixth series agent — a second `storyboard`
 profile plus a headless `package.py` on the PR-5 engine (`build_root_agent(profile)`), not a new
 project. Code is condensed for reading; the full wiring — both `Profile` definitions, the
 `StoryboardPlan` schema, the deterministic `build_manifest`/`write_package` packager, the headless

@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1812 — feat(adk-series): scaffold ADK genmedia series + Photoshoot crawl agent"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/photoshoot/
 hero: illustrations/crawl-01-photoshoot-hero.png
-diagram: diagrams/photoshoot.svg
+diagram: diagrams/photoshoot.png
 three_fold: { adk: Med, mcp: "Low/Med", gemini: High }
 ---
 
@@ -69,8 +69,8 @@ root_agent = LlmAgent(
 )
 ```
 
-That's it. *(For the record, quoted from the shipped
-[`photoshoot/photoshoot/agent.py`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/photoshoot/photoshoot/agent.py).)*
+That's it. *(Quoted from the shipped
+[`photoshoot/photoshoot/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/photoshoot/photoshoot/agent.py).)*
 The single most important line isn't in the wiring at all: it's `INSTRUCTION`, the creative brief
 that turns a generic image model into *your* photographer.
 
@@ -131,7 +131,7 @@ Different pieces of studio equipment describe the same idea with slightly differ
 says "bucket," another says something else for the same "save it to the cloud" setting. With a
 single tool you'll never notice. The moment you wire up several (that's the Music Producer, step 3),
 those differences matter, and there's a simple crosswalk,
-[`NAMING.md`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md),
+[`NAMING.md`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md),
 that keeps them straight.
 
 ## See also

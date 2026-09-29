@@ -166,6 +166,11 @@ colours/shapes, so a diagram is self-explaining out of context.
 
 **Diagram inventory (maintained):**
 - `series-arc` — the crawl→walk→run arc: which ADK construct each tier adds, monotonic ADK weight.
+  Covers all eight arc steps end to end (Tier-0 → crawl ×3 → walk → run ×3).
+- `tier0-doorway` — the Tier-0 doorway post (#1811): one `LlmAgent` (`genmedia_agent`,
+  `gemini-3.8-flash`, global region) → four stdio `MCPToolset`s (nanobanana with `tool_filter`, chirp3,
+  veo, avtool) → the four `mcp-*-go` servers (teal `box3d`, avtool noting `ffmpeg`+`ffprobe`) → the green
+  verify-by-existence step. The plain "model + tools" shape every later post specializes; standard legend.
 - `photoshoot` — `LlmAgent` → `MCPToolset(nanobanana)` → image artifact, with Gemini prompt-craft
   and the verify-by-existence step.
 - `director` — `LlmAgent` → `MCPToolset(veo)` → GCS mp4, foregrounding the model-gating footgun
@@ -175,7 +180,7 @@ colours/shapes, so a diagram is self-explaining out of context.
 - `scriptwriter-storyboarder` — `SequentialAgent`(scriptwriter → storyboarder); the walk-tier
   signature: the **purple session-state handoff** (`output_key="shot_list"` → `{shot_list}`) with the
   same-key contract gotcha and per-shot verify + 1:1 shot→image map.
-- `ad-creative-director` — the run-tier finale: `SequentialAgent[planner → ParallelAgent(shots) →
+- `ad-creative-director` — the run-tier capstone: `SequentialAgent[planner → ParallelAgent(shots) →
   audio → assembler]`. Run-tier signature — an indigo spine that **contains a `ParallelAgent`
   fan-out** (three static shot slots), the crawl personas **reused as teal `AgentTool` boxes**
   (photoshoot/director/music-producer in a dashed reuse cluster), the planner's **purple

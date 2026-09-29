@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1814 — feat(adk-series): Director/Videographer veo crawl agent"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/director-videographer/
 hero: illustrations/crawl-02-director-hero.png
-diagram: diagrams/director.svg
+diagram: diagrams/director.png
 three_fold: { adk: Med, mcp: Med, gemini: High }
 ---
 
@@ -69,7 +69,7 @@ root_agent = LlmAgent(
 ```
 
 *(Quoted from the shipped
-[`director_videographer/agent.py`](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/director-videographer/director_videographer/agent.py).)*
+[`director_videographer/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/director-videographer/director_videographer/agent.py).)*
 Once you know the shape, adding a whole new medium is mostly a matter of pointing the agent at
 different equipment and teaching it that equipment's rules. That's the freedom this pattern buys you.
 
@@ -143,7 +143,7 @@ You may have noticed the video tool describes its "save to the cloud" setting wi
 than the image tool did, and counts clips differently than the image tool counts images. Harmless
 now, but the moment one agent drives *three* different tools at once, those little differences add
 up. That's the [naming
-crosswalk](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md),
+crosswalk](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/NAMING.md),
 and it takes center stage in the next step.
 
 ## See also

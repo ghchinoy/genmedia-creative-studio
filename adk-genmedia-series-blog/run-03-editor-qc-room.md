@@ -10,7 +10,7 @@ register: Think With Google (creative, outcome-first)
 merged: "PR #1824 (squash-merge 57b54733 on main) — feat(adk-series): Editor's QC Room, an optional self-critique LoopAgent on the ad-creative-director engine"
 agent_path: experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/
 hero: illustrations/run-03-editor-qc-room-hero.png
-diagram: diagrams/editor-qc-room.svg
+diagram: diagrams/editor-qc-room.png
 three_fold: { adk: High, mcp: Med, gemini: High }
 ---
 
@@ -18,7 +18,7 @@ three_fold: { adk: High, mcp: Med, gemini: High }
 
 ![An AI editor holds a finished cut up to the light against a checklist, measures it with a ruler, spots that the music runs long, sends it back for one fix, and stamps the corrected cut approved](illustrations/run-03-editor-qc-room-hero.png)
 
-The finale built you a whole studio: a brand brief goes in, a finished, on-brand ad comes out. But
+The capstone built you a whole studio: a brand brief goes in, a finished, on-brand ad comes out. But
 every real studio has one more role you haven't hired yet: the person who watches the final cut
 before it ships, catches the thing that's *almost* right, and sends it back for one fix.
 
@@ -46,7 +46,7 @@ end, and this one is, two different ways. More on that below; it's the whole rea
 turned *on*.
 
 It's **optional and profile-agnostic**: the same QC room wraps the ad capstone *and* the storyboard
-studio from the last post. Both ship with it enabled, so `adk web` now runs it by default. Flip one
+studio from the previous post. Both ship with it enabled, so `adk web` now runs it by default. Flip one
 switch (`enable_qc=False`) and you get the exact pre-QC behavior back, byte for byte.
 
 ## How it works
@@ -61,6 +61,8 @@ LoopAgent(
     sub_agents=[assembler, critic],      # assembler FIRST, critic SECOND
 )
 ```
+
+*(Condensed from the shipped [`ad_creative_director/agent.py`](https://github.com/GoogleCloudPlatform/genmedia-creative-studio/blob/main/experiments/mcp-genmedia/sample-agents/adk-genmedia-series/ad-creative-director/ad_creative_director/agent.py); the full wiring, including the `QCVerdict` schema and the `probe_media_durations`/`exit_loop` tools, is in that file, `profiles.py`, and `schemas.py`.)*
 
 ![How it works: the assembler builds a cut → the critic measures it with ffprobe and writes a pass/fail verdict → if it fails, the notes go back to the assembler for one more pass → when it passes (or the cap is hit) the loop stops and delivers the corrected cut](diagrams/editor-qc-room.png)
 
@@ -91,7 +93,7 @@ same `output_schema` habit from the planner: the critic's reply is validated aga
 
 The problem the QC room catches is a *real*
 one from earlier in the series: the music bed is a fixed ~30-second clip, and mixing it onto a
-20-second ad leaves ten seconds of music playing over a frozen tail. In the finale, a small trim step
+20-second ad leaves ten seconds of music playing over a frozen tail. In the capstone, a small trim step
 prevented that. The QC room makes it **visible** instead.
 
 When QC is on, the assembler's *first* pass deliberately skips that trim, so the music
@@ -102,7 +104,7 @@ re-measures (now in sync) and approves it.
 
 Nothing here is faked. It's a real defect (a real skipped step), caught by a real measurement, fixed
 by a real correction. And it's gated behind the QC switch on purpose: with QC off, the assembler is the
-same always-trims one from the finale. The trap only appears in the room built to teach it.
+same always-trims one from the capstone. The trap only appears in the room built to teach it.
 
 ### Why it always stops — the part that makes this safe to ship
 
@@ -122,7 +124,7 @@ cut**, and you know it was measured, not just produced.
 
 ## Try it
 
-If you've run the finale, you already have this (it's on by default now):
+If you've run the capstone, you already have this (it's on by default now):
 
 ```bash
 adk web                   # pick "ad_creative_director_ad"
@@ -153,7 +155,7 @@ Now the studio doesn't just make the work; it checks it.
 - **The `story-generator` skill** — its self-critique **"QC room"** is the storytelling craft this
   stage re-expresses as a runnable ADK construct. Read it for the technique; this agent is the same
   idea wired into a real pipeline. (Complements the demos, never forks them.)
-- **[The Creative Director's Assistant](run-01-ad-creative-director.md)** — the finale this stage sits
+- **[The Creative Director's Assistant](run-01-ad-creative-director.md)** — the capstone this stage sits
   on top of; the QC room is stage four of that same engine.
 - **[The Creative Studio (dogfood)](run-02-creative-studio-dogfood.md)** — the storyboard profile that
   also gets the QC room, profile-agnostic, on its animatic.

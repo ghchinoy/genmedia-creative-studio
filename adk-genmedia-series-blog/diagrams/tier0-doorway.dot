@@ -1,0 +1,66 @@
+// tier0-doorway.dot — architecture of the Tier-0 doorway sample (PR-0 / #1811).
+// Theme: blog/graphic-theme.md §5. Verified against merged
+// experiments/mcp-genmedia/sample-agents/adk/genmedia_agent/agent.py
+// (one LlmAgent, FOUR stdio MCPToolsets; nanobanana tool_filter; gemini-3.8-flash / global).
+// Render:
+//   dot -Tsvg blog/diagrams/tier0-doorway.dot -o blog/diagrams/tier0-doorway.svg
+//   dot -Tpng -Gdpi=144 blog/diagrams/tier0-doorway.dot -o blog/diagrams/tier0-doorway.png
+digraph tier0_doorway {
+  graph [fontname="Inter", bgcolor="#FBFBF8", rankdir=TB, splines=true,
+         nodesep=0.4, ranksep=0.55,
+         label="Tier-0: the doorway — one LlmAgent, FOUR MCPToolsets\lThe LLM picks and sequences the tools; verify generated media by existence.\l",
+         labelloc="t", fontsize=14, fontcolor="#1F2933"];
+  node  [fontname="Inter", fontsize=11, penwidth=1.6];
+  edge  [fontname="JetBrains Mono", fontsize=9, color="#1F2933", penwidth=1.3];
+
+  user [shape=oval, style=filled, fillcolor="#F1F3F4", color="#52606D",
+        label="You\na plain request (\"generate an image of…\")"];
+  gemini [shape=ellipse, style=filled, fillcolor="#FDF0CE", color="#F9A825", fontcolor="#1F2933",
+          label="Gemini drives\ngemini-3.8-flash (global region)\npicks & sequences the right tools"];
+
+  agent [shape=box, style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9",
+         label="LlmAgent  name=\"genmedia_agent\"\ntools=[nanobanana, chirp3, veo, avtool]"];
+
+  // four toolsets (ADK, indigo) — all stdio binaries on PATH
+  ts_nb [shape=box, style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9",
+         label="MCPToolset\ntool_filter=[\"nanobanana_image_generation\"]"];
+  ts_c3 [shape=box, style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9",
+         label="MCPToolset\n(chirp3)"];
+  ts_veo [shape=box, style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9",
+          label="MCPToolset\n(veo)"];
+  ts_av [shape=box, style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9",
+         label="MCPToolset\n(avtool)"];
+
+  // four servers (MCP, teal)
+  s_nb [shape=box3d, style=filled, fillcolor="#DBF3F1", color="#00A39C",
+        label="mcp-nanobanana-go\nimage generation"];
+  s_c3 [shape=box3d, style=filled, fillcolor="#DBF3F1", color="#00A39C",
+        label="mcp-chirp3-go\ntext-to-speech (Chirp 3)"];
+  s_veo [shape=box3d, style=filled, fillcolor="#DBF3F1", color="#00A39C",
+         label="mcp-veo-go\ntext/image-to-video (Veo)"];
+  s_av [shape=box3d, style=filled, fillcolor="#DBF3F1", color="#00A39C",
+        label="mcp-avtool-go\naudio/video compositing\n(needs ffmpeg + ffprobe)"];
+
+  verify [shape=box, style="rounded,filled", fillcolor="white", color="#1E8E3E", fontcolor="#1E8E3E",
+          label="Verify by existence\ncheck the output file / GCS destination\nnot the returned resource link"];
+
+  // flow
+  user -> gemini [label="request"];
+  gemini -> agent;
+  agent -> ts_nb; agent -> ts_c3; agent -> ts_veo; agent -> ts_av;
+  ts_nb -> s_nb; ts_c3 -> s_c3; ts_veo -> s_veo; ts_av -> s_av;
+
+  s_nb  -> verify [color="#1E8E3E", style=dotted, arrowhead=none];
+  s_c3  -> verify [color="#1E8E3E", style=dotted, arrowhead=none];
+  s_veo -> verify [color="#1E8E3E", style=dotted, arrowhead=none];
+  s_av  -> verify [color="#1E8E3E"];
+
+  subgraph cluster_legend {
+    label="Legend"; fontname="Inter"; fontsize=11; color="#9AA5B1"; style="rounded";
+    L_adk    [shape=box,     style="rounded,filled", fillcolor="#E8E6FD", color="#5B4FE9", label="ADK"];
+    L_mcp    [shape=box3d,   style="filled",         fillcolor="#DBF3F1", color="#00A39C", label="genmedia MCP"];
+    L_gemini [shape=ellipse, style="filled",         fillcolor="#FDF0CE", color="#F9A825", label="Gemini"];
+    L_ver    [shape=box,     style="rounded,filled", fillcolor="white",   color="#1E8E3E", fontcolor="#1E8E3E", label="verify"];
+    L_adk -> L_mcp -> L_gemini -> L_ver [style=invis];
+  }
+}
